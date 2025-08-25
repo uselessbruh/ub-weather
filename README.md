@@ -1,6 +1,6 @@
 # 🌤️ UB Weather Dashboard
 
-A comprehensive, interactive weather dashboard featuring real-time weather data, animated backgrounds, weather radar, and advanced forecasting capabilities. Built with modern web technologies and powered by the wttr.in weather API.
+A comprehensive, interactive weather dashboard featuring real-time weather data, animated backgrounds, weather radar, and advanced forecasting capabilities. Built with modern web technologies and powered by the wttr.in weather API. Features professional UB branding with custom logo integration.
 
 ![Weather Dashboard](https://img.shields.io/badge/Weather-Dashboard-blue?style=for-the-badge&logo=weather&logoColor=white)
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
@@ -19,13 +19,14 @@ A comprehensive, interactive weather dashboard featuring real-time weather data,
 
 ### 🎨 **Dynamic Visual Experience**
 - **Time-Based Backgrounds**: Different imagery for day/night conditions
+- **Professional Branding**: UB logo integration as favicon and brand identity
 - **Weather-Specific Animations**: 
   - Rain with animated droplets
   - Snow with falling snowflakes
   - Thunder with lightning effects
   - Sunny with glow animations
   - Cloudy with drifting cloud animations
-- **High-Quality Images**: Weather-appropriate background images from Unsplash
+- **High-Quality Images**: Weather-appropriate background images created with AI (Gemini)
 - **Hot Weather Handling**: Simple gradient backgrounds for extreme temperatures (30°C+)
 
 ### 📡 **Advanced Weather Radar**
@@ -93,9 +94,12 @@ A comprehensive, interactive weather dashboard featuring real-time weather data,
    ```
    UB-Weather-Dashboard/
    ├── index.html          # Main application file
-   ├── style.css          # Custom styles (embedded in HTML)
-   ├── main.js            # JavaScript logic (embedded in HTML)
-   └── README.md          # This documentation
+   ├── style.css          # Custom CSS animations and styling
+   ├── script.js          # JavaScript application logic
+   ├── README.md          # This documentation
+   └── assets/            # Weather images and branding
+       ├── ublogo.png     # UB Logo for branding/favicon
+       └── [weather-images] # Various weather condition backgrounds
    ```
 
 3. **Run the Application**
@@ -181,14 +185,22 @@ const data = await response.json();
 
 ## 🎨 Customization
 
+### Professional Branding
+The dashboard features UB branding integration:
+- **Favicon Integration**: `ublogo.png` serves as the browser tab icon
+- **Brand Identity**: Professional appearance with UB logo in browser tabs
+- **Cross-Platform Icons**: Supports iOS home screen icons and standard favicons
+- **Bookmark Recognition**: Logo appears when users bookmark the page
+
 ### Background Images
-Weather backgrounds use curated Unsplash images:
-- **Rain**: Heavy rainfall scenes
-- **Snow**: Winter snowfall imagery
-- **Sunny**: Bright, clear sky photos
-- **Cloudy**: Dramatic cloud formations
-- **Thunder**: Storm and lightning scenes
+Weather backgrounds use AI-generated images created with Gemini:
+- **Rain**: Heavy rainfall scenes with animated effects
+- **Snow**: Winter snowfall imagery with falling snowflakes
+- **Sunny**: Bright, clear sky photos with glow animations
+- **Cloudy**: Dramatic cloud formations with drifting effects
+- **Thunder**: Storm and lightning scenes with flash effects
 - **Night**: Dark, atmospheric nighttime imagery
+- **Hot Weather**: Gradient backgrounds for extreme temperatures (30°C+)
 
 ### Color Scheme
 The dashboard uses a modern dark theme with:
@@ -306,7 +318,6 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ### APIs and Services
 - **[wttr.in](https://wttr.in)**: Free weather data API
-- **[Unsplash](https://unsplash.com)**: High-quality weather imagery
 - **[NOAA](https://weather.gov)**: US weather radar data
 - **[RainViewer](https://rainviewer.com)**: Global precipitation radar
 
@@ -315,11 +326,11 @@ This project is open source and available under the [MIT License](LICENSE).
 - **[Chart.js](https://chartjs.org)**: Interactive charts
 - **[Google Fonts](https://fonts.google.com)**: Web typography
 
-### Design Inspiration
-- Modern weather applications
-- Material Design principles
-- Glass-morphism design trends
-- Mobile-first responsive design
+### Design and Branding
+- **UB Logo Integration**: Professional branding with favicon support
+- **AI-Generated Weather Imagery**: Custom weather backgrounds created using Gemini AI
+- **Modern UI Design**: Glass-morphism and animated effects
+- **Material Design**: Interactive elements and user feedback
 
 ## 📞 Support
 
