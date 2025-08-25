@@ -1,5 +1,7 @@
 const API_BASE = 'https://wttr.in/';
 let currentLocation = '';
+let currentTimezone = null; // Store timezone information
+let locationTime = null; // Store actual location time from API
 let hourlyChart, trendsChart;
 let settings = {
     tempUnit: 'celsius',
@@ -379,6 +381,20 @@ function updateUI(data) {
     const current = data.current_condition[0];
     const today = data.weather[0];
     const location = data.nearest_area[0];
+    
+    // Get timezone information from location data
+    const country = location.country[0].value;
+    const region = location.region ? location.region[0].value : '';
+    const areaName = location.areaName[0].value;
+    
+    // Determine timezone based on country/region
+    currentTimezone = getTimezoneFromLocation(country, region, areaName);
+    
+    console.log(`Location: ${areaName}, Country: ${country}, Region: ${region}, Timezone: ${currentTimezone}`);
+    
+    // Fetch real time from WorldTimeAPI
+    fetchLocationTimeFromAPI(currentTimezone);
+    
     document.getElementById('current-location').textContent =
         `${location.areaName[0].value}, ${location.country[0].value}`;
     updateWeatherBackground(current.weatherCode, today.astronomy[0], current.temp_C);
@@ -401,6 +417,83 @@ function updateUI(data) {
         console.error('Error updating widgets:', error);
     }
 }
+
+// Function to fetch real time from WorldTimeAPI
+async function fetchLocationTime(lat, lon) {
+    try {
+        // Method 1: Try TimeAPI.io which accepts coordinates
+        try {
+            const coordResponse = await fetch(`https://timeapi.io/api/Time/current/coordinate?latitude=${lat}&longitude=${lon}`);
+            if (coordResponse.ok) {
+                const coordData = await coordResponse.json();
+                locationTime = {
+                    datetime: new Date(coordData.dateTime),
+                    timezone: coordData.timeZone,
+                    offset: coordData.utcOffset
+                };
+                console.log('Fetched real time using coordinates:', locationTime);
+                return;
+            }
+        } catch (coordError) {
+            console.log('Coordinate-based API failed, trying timezone lookup');
+        }
+        
+        // Method 2: Try WorldTimeAPI with timezone lookup
+        const timezone = getTimezoneFromCoordinates(lat, lon);
+        if (timezone && timezone !== 'UTC') {
+            const response = await fetch(`https://worldtimeapi.org/api/timezone/${timezone}`);
+            if (response.ok) {
+                const timeData = await response.json();
+                locationTime = {
+                    datetime: new Date(timeData.datetime),
+                    timezone: timeData.timezone,
+                    offset: timeData.utc_offset
+                };
+                console.log('Fetched real time for', timezone, ':', locationTime);
+                return;
+            }
+        }
+        
+        // Method 3: Try a free coordinate-based time API
+        try {
+            const geoResponse = await fetch(`http://api.geonames.org/timezoneJSON?lat=${lat}&lng=${lon}&username=demo`);
+            if (geoResponse.ok) {
+                const geoData = await geoResponse.json();
+                if (geoData.time) {
+                    // Parse the time from geonames format
+                    const timeStr = geoData.time;
+                    const [datePart, timePart] = timeStr.split(' ');
+                    const [year, month, day] = datePart.split('-');
+                    const [hour, minute] = timePart.split(':');
+                    
+                    const geoTime = new Date(year, month - 1, day, hour, minute);
+                    locationTime = {
+                        datetime: geoTime,
+                        timezone: geoData.timezoneId || 'Unknown',
+                        offset: `${geoData.gmtOffset >= 0 ? '+' : ''}${geoData.gmtOffset}:00`
+                    };
+                    console.log('Fetched time using GeoNames:', locationTime);
+                    return;
+                }
+            }
+        } catch (geoError) {
+            console.log('GeoNames API failed');
+        }
+        
+        // Fallback: Use local browser time (not ideal but better than nothing)
+        locationTime = {
+            datetime: new Date(),
+            timezone: 'Local',
+            offset: 'Local'
+        };
+        console.log('Using local time as final fallback');
+        
+    } catch (error) {
+        console.error('Error fetching location time:', error);
+        locationTime = null; // Fall back to local time display
+    }
+}
+
 function updateWeatherBackground(weatherCode, astronomy, temperature) {
     const bg = document.getElementById('weather-bg');
     const weather = weatherCodes[weatherCode] || { bg: 'sunny' };
@@ -787,8 +880,111 @@ function checkWeatherAlerts(current) {
         alertContainer.classList.add('hidden');
     }
 }
+
+// Function to get timezone identifier from coordinates
+function getTimezoneFromCoordinates(lat, lon) {
+    // More precise timezone mappings - using smaller, more accurate ranges
+    const timezones = [
+        // Europe - more precise coordinates
+        { name: 'Europe/London', lat: [50.0, 59.0], lon: [-6.0, 2.0] },
+        { name: 'Europe/Paris', lat: [42.0, 51.5], lon: [-1.0, 8.0] },
+        { name: 'Europe/Berlin', lat: [47.0, 55.0], lon: [6.0, 15.0] },
+        { name: 'Europe/Rome', lat: [36.0, 47.0], lon: [6.0, 19.0] },
+        { name: 'Europe/Madrid', lat: [36.0, 44.0], lon: [-9.0, 4.0] },
+        { name: 'Europe/Moscow', lat: [55.0, 56.0], lon: [37.0, 38.0] },
+        
+        // Asia - more precise
+        { name: 'Asia/Tokyo', lat: [35.0, 36.0], lon: [139.0, 140.0] },
+        { name: 'Asia/Shanghai', lat: [31.0, 32.0], lon: [121.0, 122.0] },
+        { name: 'Asia/Kolkata', lat: [22.0, 23.0], lon: [88.0, 89.0] },
+        { name: 'Asia/Dubai', lat: [25.0, 26.0], lon: [55.0, 56.0] },
+        { name: 'Asia/Seoul', lat: [37.0, 38.0], lon: [126.0, 127.0] },
+        
+        // Americas - more precise
+        { name: 'America/New_York', lat: [40.0, 41.0], lon: [-74.0, -73.0] },
+        { name: 'America/Chicago', lat: [41.0, 42.0], lon: [-88.0, -87.0] },
+        { name: 'America/Denver', lat: [39.0, 40.0], lon: [-105.0, -104.0] },
+        { name: 'America/Los_Angeles', lat: [34.0, 35.0], lon: [-118.0, -117.0] },
+        
+        // Oceania
+        { name: 'Australia/Sydney', lat: [-34.0, -33.0], lon: [151.0, 152.0] },
+        { name: 'Pacific/Auckland', lat: [-37.0, -36.0], lon: [174.0, 175.0] },
+    ];
+    
+    // Check for exact city matches first
+    for (const tz of timezones) {
+        if (lat >= tz.lat[0] && lat <= tz.lat[1] && 
+            lon >= tz.lon[0] && lon <= tz.lon[1]) {
+            console.log(`Matched timezone: ${tz.name} for coordinates: ${lat}, ${lon}`);
+            return tz.name;
+        }
+    }
+    
+    // If no exact match, try broader regional mapping
+    if (lat >= 35 && lat <= 70 && lon >= -10 && lon <= 40) {
+        // Europe region
+        if (lon >= -6 && lon <= 2) return 'Europe/London';
+        if (lon >= 2 && lon <= 8) return 'Europe/Paris';
+        if (lon >= 8 && lon <= 15) return 'Europe/Berlin';
+        if (lon >= 15 && lon <= 25) return 'Europe/Warsaw';
+        if (lon >= 25 && lon <= 40) return 'Europe/Moscow';
+    } else if (lat >= 25 && lat <= 50 && lon >= 100 && lon <= 150) {
+        // East Asia region
+        if (lon >= 100 && lon <= 110) return 'Asia/Shanghai';
+        if (lon >= 110 && lon <= 130) return 'Asia/Shanghai';
+        if (lon >= 130 && lon <= 150) return 'Asia/Tokyo';
+    } else if (lat >= 25 && lat <= 50 && lon >= -130 && lon <= -60) {
+        // North America region
+        if (lon >= -130 && lon <= -115) return 'America/Los_Angeles';
+        if (lon >= -115 && lon <= -100) return 'America/Denver';
+        if (lon >= -100 && lon <= -85) return 'America/Chicago';
+        if (lon >= -85 && lon <= -60) return 'America/New_York';
+    }
+    
+    console.log(`No timezone match found for coordinates: ${lat}, ${lon}, using UTC`);
+    return 'UTC';
+}
+
 function updateDateTime() {
     const now = new Date();
+    
+    // If we have a location and timezone, show that location's current time
+    if (currentLocation && currentTimezone) {
+        try {
+            // Use the browser's built-in timezone conversion - this is the most reliable
+            const locationDate = new Intl.DateTimeFormat('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                timeZone: currentTimezone
+            }).format(now);
+            
+            const locationTimeStr = new Intl.DateTimeFormat('en-US', {
+                hour12: true,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                timeZone: currentTimezone
+            }).format(now);
+            
+            document.getElementById('current-time').textContent = locationDate;
+            document.getElementById('local-time').textContent = `${locationTimeStr} (${currentLocation})`;
+            
+        } catch (error) {
+            console.error('Timezone error:', error);
+            // If timezone is invalid, fall back to local time
+            showLocalTime(now);
+        }
+    } else {
+        // Show local time when no location is set
+        showLocalTime(now);
+    }
+}
+
+// Remove the refresh function since we're using browser's built-in timezone support
+
+function showLocalTime(now) {
     document.getElementById('current-time').textContent =
         now.toLocaleDateString('en-US', {
             weekday: 'long',
@@ -804,6 +1000,7 @@ function updateDateTime() {
             second: '2-digit'
         });
 }
+
 function showLoading() {
     document.getElementById('loading').classList.remove('hidden');
     document.getElementById('main-content').classList.add('hidden');

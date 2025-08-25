@@ -27,60 +27,10 @@ body {
         url('./assets/rain.png');
 }
 
-.rain::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image:
-        linear-gradient(rgba(255, 255, 255, 0.4) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.4) 1px, transparent 1px);
-    background-size: 3px 50px, 50px 3px;
-    animation: rain-fall 0.5s linear infinite;
-    opacity: 0.6;
-}
-
-@keyframes rain-fall {
-    0% {
-        transform: translateY(-100px);
-    }
-
-    100% {
-        transform: translateY(100vh);
-    }
-}
-
 
 .snow {
     background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),
         url('./assets/snow.png');
-}
-
-.snow::after {
-    content: '❄';
-    position: absolute;
-    color: white;
-    font-size: 20px;
-    animation: snow-fall 3s linear infinite;
-    opacity: 0.8;
-}
-
-@keyframes snow-fall {
-    0% {
-        transform: translateY(-100px) translateX(0px);
-        opacity: 0;
-    }
-
-    50% {
-        opacity: 1;
-    }
-
-    100% {
-        transform: translateY(100vh) translateX(100px);
-        opacity: 0;
-    }
 }
 
 
@@ -88,19 +38,6 @@ body {
     background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1)),
         url('./assets/sunny.png');
     background-size: cover;
-    animation: sunny-glow 4s ease infinite;
-}
-
-@keyframes sunny-glow {
-
-    0%,
-    100% {
-        filter: brightness(1) saturate(1);
-    }
-
-    50% {
-        filter: brightness(1.1) saturate(1.2);
-    }
 }
 
 
@@ -109,71 +46,16 @@ body {
         url('./assets/cloudy.png');
 }
 
-.cloudy::before {
-    content: '☁';
-    position: absolute;
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 40px;
-    animation: cloud-drift 6s ease-in-out infinite;
-}
-
-@keyframes cloud-drift {
-
-    0%,
-    100% {
-        transform: translateX(-50px);
-    }
-
-    50% {
-        transform: translateX(50px);
-    }
-}
-
 
 .thunder {
     background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
         url('./assets/thunder.png');
-    animation: thunder-flash 2s ease-in-out infinite;
-}
-
-@keyframes thunder-flash {
-
-    0%,
-    90%,
-    100% {
-        filter: brightness(1);
-    }
-
-    5%,
-    10% {
-        filter: brightness(2) saturate(0);
-    }
 }
 
 
 .clear-night {
     background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
         url('./assets/clear-night.png');
-}
-
-.clear-night::after {
-    content: '✨';
-    position: absolute;
-    color: white;
-    font-size: 12px;
-    animation: twinkle 2s ease-in-out infinite;
-}
-
-@keyframes twinkle {
-
-    0%,
-    100% {
-        opacity: 0.3;
-    }
-
-    50% {
-        opacity: 1;
-    }
 }
 
 
@@ -259,18 +141,6 @@ body {
 .hot.extreme {
     background-image: linear-gradient(135deg, #fd79a8, #fdcb6e, #e84393),
         url('./assets/hot-extreme.png');
-}
-
-@keyframes hot-shimmer {
-
-    0%,
-    100% {
-        background-position: 0% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
-    }
 }
 
 
